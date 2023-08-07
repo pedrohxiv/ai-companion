@@ -7,10 +7,9 @@ import { CldUploadButton } from 'next-cloudinary';
 interface ImageUploadProps {
   value: string;
   onChange: (src: string) => void;
-  disabled?: boolean;
 }
 
-export const ImageUpload = ({ value, onChange, disabled }: ImageUploadProps) => {
+export const ImageUpload = ({ value, onChange }: ImageUploadProps) => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -25,12 +24,13 @@ export const ImageUpload = ({ value, onChange, disabled }: ImageUploadProps) => 
     <div className="space-y-4 w-full flex flex-col justify-center items-center">
       <CldUploadButton
         options={{ maxFiles: 1 }}
+        onUpload={(result: any) => onChange(result.info.secure_url)}
         uploadPreset="v4ass1ji"
       >
         <div className="p-4 border-4 border-dashed border-primary/10 rounded-lg hover:opacity-75 transition flex flex-col space-y-2 items-center justify-center">
           <div className="relative h-40 w-40">
             <Image
-              src="/placeholder.svg"
+              src={value || '/placeholder.svg'}
               alt="Upload"
               fill
               className="rounded-lg object-cover"
