@@ -4,12 +4,15 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { CldUploadButton } from 'next-cloudinary';
 
+import { cn } from '@/lib/utils';
+
 interface ImageUploadProps {
   value: string;
   onChange: (src: string) => void;
+  disabled?: boolean;
 }
 
-export const ImageUpload = ({ value, onChange }: ImageUploadProps) => {
+export const ImageUpload = ({ value, onChange, disabled }: ImageUploadProps) => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -27,7 +30,12 @@ export const ImageUpload = ({ value, onChange }: ImageUploadProps) => {
         onUpload={(result: any) => onChange(result.info.secure_url)}
         uploadPreset="v4ass1ji"
       >
-        <div className="p-4 border-4 border-dashed border-primary/10 rounded-lg hover:opacity-75 transition flex flex-col space-y-2 items-center justify-center">
+        <div
+          className={cn(
+            'p-4 border-4 border-dashed border-primary/10 rounded-lg hover:opacity-75 transition flex flex-col space-y-2 items-center justify-center',
+            disabled && 'cursor-not-allowed opacity-50 hover:opacity-50',
+          )}
+        >
           <div className="relative h-40 w-40">
             <Image
               src={value || '/placeholder.svg'}

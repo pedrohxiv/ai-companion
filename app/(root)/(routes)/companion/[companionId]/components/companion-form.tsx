@@ -1,10 +1,14 @@
 'use client';
 
+import axios from 'axios';
 import * as z from 'zod';
 import { Category, Companion } from '@prisma/client';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Wand2 } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -24,7 +28,15 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
 import { ImageUpload } from '@/components/image-upload';
+
+const PREAMBLE = `You are Steve Jobs. You co-founded Apple and have a reputation for your impeccable design sense and a vision for products that change the world. You're charismatic and known for your signature black turtleneck. You are characterized by intense passion and unwavering focus. When discussing Apple or technology, your tone is firm, yet filled with an underlying excitement about possibilities.`;
+
+const SEED_CHAT = `Human: Hi Steve, what's the next big thing for Apple?
+Steve: *intensely* We don't just create products. We craft experiences, ways to change the world.
+Human: Your dedication is palpable.
+Steve: *with fervor* Remember, those who are crazy enough to think they can change the world are the ones who do.`;
 
 interface CompanionFormProps {
   initialData: Companion | null;
@@ -37,12 +49,17 @@ const formSchema = z.object({
   instructions: z
     .string()
     .min(200, { message: 'Instructions require at lest 200 characters.' }),
-  seed: z.string().min(200, { message: 'Seed require at lest 200 characters.' }),
+  seed: z
+    .string()
+    .min(200, { message: 'Example conversation require at lest 200 characters.' }),
   src: z.string().min(1, { message: 'Image is required.' }),
   categoryId: z.string().min(1, { message: 'Category is required.' }),
 });
 
 export const CompanionForm = ({ initialData, categories }: CompanionFormProps) => {
+  const { toast } = useToast();
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
@@ -58,7 +75,34 @@ export const CompanionForm = ({ initialData, categories }: CompanionFormProps) =
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    try {
+      if (initialData) {
+        await axios.patch(`/api/companion/${initialData.id}`, values);
+
+        toast({
+          title: 'SUCCESS! Your companion are updated.',
+          description: 'Your request to update the companion was successfully processed.',
+        });
+      } else {
+        await axios.post('/api/companion', values);
+
+        toast({
+          title: 'SUCCESS! New companion added.',
+          description: 'Your request to add new companion was successfully processed.',
+        });
+      }
+
+      router.refresh();
+      router.push('/');
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'There was a problem with your request.',
+      });
+
+      console.error(error);
+    }
   };
 
   return (
@@ -85,6 +129,7 @@ export const CompanionForm = ({ initialData, categories }: CompanionFormProps) =
                   <ImageUpload
                     onChange={field.onChange}
                     value={field.value}
+                    disabled={isLoading}
                   />
                 </FormControl>
                 <FormMessage />
@@ -166,6 +211,7 @@ export const CompanionForm = ({ initialData, categories }: CompanionFormProps) =
                   <FormDescription>
                     Select a category for your AI Companion.
                   </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -190,17 +236,49 @@ export const CompanionForm = ({ initialData, categories }: CompanionFormProps) =
                     className="bg-background resize-none"
                     rows={7}
                     disabled={isLoading}
-                    placeholder="Steve Jobs"
+                    placeholder={PREAMBLE}
                     {...field}
                   />
                 </FormControl>
                 <FormDescription>
-                  This is how your AI Companion will be named.
+                  Describe in detail your companion&apos;s backstory and relevant details.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+          <FormField
+            name="seed"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem className="col-span-2 md:col-span-1">
+                <FormLabel>Example conversation</FormLabel>
+                <FormControl>
+                  <Textarea
+                    className="bg-background resize-none"
+                    rows={7}
+                    disabled={isLoading}
+                    placeholder={SEED_CHAT}
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Describe in detail an example of a detailed conversation with your AI
+                  Companion.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="w-full flex justify-center">
+            <Button
+              size="lg"
+              disabled={isLoading}
+            >
+              {initialData ? 'Edit your companion' : 'Create your companion'}
+              <Wand2 className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
         </form>
       </Form>
     </div>
