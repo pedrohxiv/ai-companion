@@ -6,7 +6,7 @@ import { Category, Companion } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Wand2 } from 'lucide-react';
+import { Loader2, Wand2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -275,8 +275,14 @@ export const CompanionForm = ({ initialData, categories }: CompanionFormProps) =
               size="lg"
               disabled={isLoading}
             >
-              {initialData ? 'Edit your companion' : 'Create your companion'}
-              <Wand2 className="w-4 h-4 ml-2" />
+              {isLoading ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : (
+                <>
+                  {initialData ? 'Edit your companion' : 'Create your companion'}
+                  <Wand2 className="w-4 h-4 ml-2" />
+                </>
+              )}
             </Button>
           </div>
         </form>

@@ -27,6 +27,7 @@ export async function PATCH(
     const companion = await prismadb.companion.update({
       where: {
         id: params.companionId,
+        userId: user.id,
       },
       data: {
         userId: user.id,
@@ -43,6 +44,35 @@ export async function PATCH(
     return NextResponse.json(companion);
   } catch (error) {
     console.error('[COMPANION_PATCH]', error);
+    return new NextResponse('Internal Error', { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { companionId: string } },
+) {
+  try {
+    const user = await currentUser();
+
+    if (!user || !user.id || !user.firstName) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    if (!params.companionId) {
+      return new NextResponse('Companion ID is required', { status: 400 });
+    }
+
+    const companion = await prismadb.companion.delete({
+      where: {
+        id: params.companionId,
+        userId: user.id,
+      },
+    });
+
+    return NextResponse.json(companion);
+  } catch (error) {
+    console.error('[COMPANION_DELETE]', error);
     return new NextResponse('Internal Error', { status: 500 });
   }
 }
