@@ -1,31 +1,26 @@
-import './globals.css';
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import { ClerkProvider } from '@clerk/nextjs';
+import "./globals.css";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 
-import { Toaster } from '@/components/ui/toaster';
-import { ThemeProvider } from '@/components/theme-provider';
-import { cn } from '@/lib/utils';
+import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ProModal } from "@/components/pro-modal";
+import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'companion.ai',
+  title: "companion.ai",
 };
 
 const GlobalLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <ClerkProvider>
-      <html
-        lang="en"
-        suppressHydrationWarning
-      >
-        <body className={cn('h-full bg-secondary', inter.className)}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-          >
+      <html lang="en" suppressHydrationWarning>
+        <body className={cn("h-full bg-secondary", inter.className)}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <ProModal />
             {children}
             <Toaster />
           </ThemeProvider>

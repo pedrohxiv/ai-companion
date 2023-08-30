@@ -1,36 +1,46 @@
-'use client';
+"use client";
 
-import { Home, Plus, Settings } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { Home, Plus, Settings } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 
-import { cn } from '@/lib/utils';
+import { useProModal } from "@/hooks/use-pro-modal";
+import { cn } from "@/lib/utils";
 
-export const Sidebar = () => {
+interface SidebarProps {
+  isPro: boolean;
+}
+
+export const Sidebar = ({ isPro }: SidebarProps) => {
   const pathname = usePathname();
   const router = useRouter();
+  const proModal = useProModal();
 
   const routes = [
     {
       icon: Home,
-      href: '/',
-      label: 'Home',
+      href: "/",
+      label: "Home",
       pro: false,
     },
     {
       icon: Plus,
-      href: '/companion/new',
-      label: 'Create',
+      href: "/companion/new",
+      label: "Create",
       pro: true,
     },
     {
       icon: Settings,
-      href: '/settings',
-      label: 'Settings',
+      href: "/settings",
+      label: "Settings",
       pro: false,
     },
   ];
 
   const onNavigate = (url: string, pro: boolean) => {
+    if (pro && !isPro) {
+      return proModal.onOpen();
+    }
+
     return router.push(url);
   };
 
@@ -43,8 +53,8 @@ export const Sidebar = () => {
               onClick={() => onNavigate(route.href, route.pro)}
               key={route.href}
               className={cn(
-                'text-muted-foreground text-xs group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg transition',
-                pathname === route.href && 'bg-primary/10 text-primary',
+                "text-muted-foreground text-xs group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg transition",
+                pathname === route.href && "bg-primary/10 text-primary"
               )}
             >
               <div className="flex flex-col gap-y-2 items-center flex-1">
